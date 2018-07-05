@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - wget https://apt.puppetlabs.com/puppet5-release-xenial.deb
+      - dpkg -i puppet5-release-xenial.deb
+      - apt update
+      - apt-get install pdk
+  build:
+    commands:
+      - /opt/puppetlabs/bin/pdk/bin/pdk test
+      - /opt/puppetlabs/bin/pdk/bin/pdk validate
