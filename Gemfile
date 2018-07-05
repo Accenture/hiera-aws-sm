@@ -43,6 +43,11 @@ hiera_version = ENV['HIERA_GEM_VERSION']
 
 gems = {}
 
+gems['aws-sdk'] = ['~> 3']
+gems['retries']
+gems['json']
+
+
 gems['puppet'] = location_for(puppet_version)
 
 # If facter or hiera versions have been specified via the environment
