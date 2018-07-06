@@ -10,7 +10,6 @@ describe FakeFunction do
   let :context do
     ctx = instance_double('Puppet::LookupContext')
     allow(ctx).to receive(:cache_has_key).and_return(false)
-    #allow(ctx).to receive(:explain).and_return(:nil)
     allow(ctx).to receive(:explain) { |&block| puts(block.call()) }
     allow(ctx).to receive(:not_found).and_throw(:no_such_key)
     allow(ctx).to receive(:cache).with(String, anything) do |_, val|
@@ -34,6 +33,11 @@ describe FakeFunction do
     it 'should run' do
       expect( function.lookup_key( 'test_key', asm_options, context ) ).to be_nil
     end
+
+    # Test parameters
+
+    # Test behaviour
+    context ''
 
   end
 

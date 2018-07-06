@@ -47,4 +47,6 @@ RSpec.configure do |c|
     # by default Puppet runs at warning level
     Puppet.settings[:strict] = :warning
   end
+  c.expect_with :rspec
+  c.mock_with :rspec
 end
