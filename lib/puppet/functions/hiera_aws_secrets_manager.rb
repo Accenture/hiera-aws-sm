@@ -23,7 +23,6 @@ Puppet::Functions.create_function(:hiera_aws_secrets_manager) do
     param 'Puppet::LookupContext', :context
   end
 
-  @@secretsmanager = Aws::SecretsManager::Client.new
 
   ##
   # lookup_key
@@ -36,7 +35,6 @@ Puppet::Functions.create_function(:hiera_aws_secrets_manager) do
   def lookup_key(key, options, context)
     # filtering and the like here
     result = get_secret(key, options, context)
-
     return result
   end
 
@@ -52,19 +50,31 @@ Puppet::Functions.create_function(:hiera_aws_secrets_manager) do
   # @return TODO
   def get_secret(key, options, context)
 
+    secretsmanager = Aws::SecretsManager::Client.new
     secret_key = secret_key_name(key, options)
 
     response = nil
+    secret = nil
 
     context.explain("[hiera-aws-sm] Looking up #{secret_key}")
     begin
       response = secretsmanager.get_secret_value(secret_id: secret_key)
-    rescue StandardError
+    rescue Aws::SecretsManager::Errors::ResourceNotFoundException
+      context.explain("[hiera-aws-sm] No data found for #{secret_key}")
+    rescue Aws::SecretsManager::Errors::UnrecognizedClientException
+      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{secret_key}"
+    rescue Aws::SecretsManager::Errors::ServiceError
+      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{secret_key}"
     end
 
-    if ! response.secret_binary.nil?
-      context.explain("[hiera-aws-sm] #{secret_key} is a binary")
-      return response.secret_binary
+    if ! response.nil?
+      if ! response.secret_binary.nil?
+        context.explain("[hiera-aws-sm] #{secret_key} is a binary")
+        secret = response.secret_binary
+      else
+        # Do our processing in here
+        secret = response.secret_string
+      end
     end
 
 
@@ -81,8 +91,8 @@ Puppet::Functions.create_function(:hiera_aws_secrets_manager) do
     #   if it's json, return a hash, else just string
 
 
-    response = context.not_found if response.nil?
-    return response
+    secret = context.not_found if secret.nil?
+    return secret
   end
 
   ##
