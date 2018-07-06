@@ -1,19 +1,19 @@
-Puppet::Functions.create_function(:hiera_aws_secrets_manager) do
+Puppet::Functions.create_function(:hiera_aws_sm) do
 
   begin
     require 'json'
   rescue LoadError => e
-    raise Puppet::DataBinding::LookupError, "[hiera-aws-secrets-manager] Must install json gem to use hiera-aws-secrets-manager backend"
+    raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Must install json gem to use hiera-aws-sm backend"
   end
   begin
     require 'aws-sdk-core'
   rescue LoadError => e
-    raise Puppet::DataBinding::LookupError, "[hiera-aws-secrets-manager] Must install aws-sdk-core gem to use hiera-aws-secrets-manager backend"
+    raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Must install aws-sdk-core gem to use hiera-aws-sm backend"
   end
   begin
     require 'aws-sdk-secretsmanager'
   rescue LoadError => e
-    raise Puppet::DataBinding::LookupError, "[hiera-aws-secrets-manager] Must install aws-sdk-secretsmanager gem to use hiera-aws-secrets-manager backend"
+    raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Must install aws-sdk-secretsmanager gem to use hiera-aws-sm backend"
   end
 
 
@@ -35,6 +35,12 @@ Puppet::Functions.create_function(:hiera_aws_secrets_manager) do
   def lookup_key(key, options, context)
     # filtering and the like here
     result = get_secret(key, options, context)
+
+    continue_if_not_found = options["continue_if_not_found"] || false
+
+    if result.nil? and continue_if_not_found
+      context.not_found
+    end
     return result
   end
 
@@ -91,7 +97,6 @@ Puppet::Functions.create_function(:hiera_aws_secrets_manager) do
     #   if it's json, return a hash, else just string
 
 
-    secret = context.not_found if secret.nil?
     return secret
   end
 
