@@ -85,5 +85,50 @@ describe FakeFunction do
           .to raise_error(Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup test_key")
       end
     end
+
+    context "when querying a simple secret" do
+      before do
+        Aws.config[:secretsmanager] = {
+          stub_responses: {
+            get_secret_value: {
+              name: 'test_key',
+              secret_string: 'password1'
+            }
+          }
+        }
+      end
+      it 'should return a String' do
+        expect(function.lookup_key('test_key', options, context))
+          .to be_a(String)
+      end
+      it 'should be the correct value' do
+        expect(function.lookup_key('test_key', options, context))
+          .to eq('password1')
+      end
+    end
+
+    context "when querying a json encoded secret" do
+      before do
+        Aws.config[:secretsmanager] = {
+          stub_responses: {
+            get_secret_value: {
+              name: 'test_key',
+              secret_string: "{\"key1\": \"value1\", \"key2\": \"value2\"}"
+            }
+          }
+        }
+      end
+      it 'should return a Hash' do
+        expect(function.lookup_key('test_key', options, context))
+          .to be_a(Hash)
+      end
+      it 'should be the correct value' do
+        expect(function.lookup_key('test_key', options, context))
+          .to eq({
+            "key1" => "value1",
+            "key2" => "value2"
+          })
+      end
+    end
   end
 end
