@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'puppet/functions/hiera_aws_secrets_manager'
+require 'puppet/functions/hiera_aws_sm'
 
 describe FakeFunction do
 
