@@ -53,7 +53,10 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
   # @param options Options hash
   # @param context Puppet::LookupContext
   #
-  # @return TODO
+  # @return One of Hash, String, (Binary?) depending on the value returned
+  # by AWS Secrets Manager. If a secret_binary is present in the response,
+  # it is returned directly. If secret_string is set, and can be co-erced
+  # into a Hash, it is returned, otherwise a String is returned.
   def get_secret(key, options, context)
 
     secretsmanager = Aws::SecretsManager::Client.new
@@ -79,35 +82,30 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
         secret = response.secret_binary
       else
         # Do our processing in here
-        secret = response.secret_string
+        secret = process_secret_string(response.secret_string)
       end
     end
-
-
-    # might be SecretBinary or SecretString
-
-    # setup secret manager client
-    # make request
-    #    support versions?
-    # handle errors?
-    # support a prefix?
-
-    # process respond
-    #    response could be json or string
-    #   if it's json, return a hash, else just string
-
 
     return secret
   end
 
   ##
-  # Get the secret name to lookup
+  # Get the secret name to lookup, applying a prefix if
+  # one is set in the options
   def secret_key_name(key, options)
     if options.key?('prefix')
       [options.prefix, key].join('/')
     else
       key
     end
+  end
+
+  ##
+  # Process the response secret string by attempting to coerce it
+  def process_secret_string(secret_string)
+    result = secret_string
+
+    return result
   end
 
 end
