@@ -33,6 +33,41 @@ describe FakeFunction do
     end
 
     # Test parameters / options
+    context 'when confine_to_keys is set' do
+      describe "and not an array" do
+        let :options do
+          { "confine_to_keys" => 'foobar'}
+        end
+        it "should raise ArgumentError" do
+          expect{function.lookup_key('test_key', options, context)}
+            .to raise_error(ArgumentError, "[hiera-aws-sm] confine_to_keys must be an array")
+        end
+      end
+      describe "with regex values" do
+        before do
+          Aws.config[:secretsmanager] = {
+            stub_responses: {
+              get_secret_value: {
+                name: 'puppet_password',
+                secret_string: 'password1'
+              }
+            }
+          }
+        end
+        let :options do
+          { "confine_to_keys" => [
+            '^puppet_.*'
+          ]}
+        end
+        it "should return context.not_found for non-matching keys" do
+          expect{function.lookup_key('test_key', options, context)}.to throw_symbol(:no_such_key)
+        end
+        it "should return the expected result for matching keys" do
+          expect(function.lookup_key('puppet_password', options, context)).to eq('password1')
+          expect(function.lookup_key('puppet_password', options, context)).to be_a(String)
+        end
+      end
+    end
 
     # Test behaviour
     context 'accessing non-existant key' do

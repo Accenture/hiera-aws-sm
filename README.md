@@ -14,6 +14,8 @@
 
 Backend for Hiera 5 which allows lookups against Amazon Secrets Manager.
 
+Based on the design of [hiera-vault](https://github.com/davealden/hiera-vault/blob/master/lib/puppet/functions/hiera_vault.rb)
+
 ## Setup
 
 Requires the `aws-sdk` gem to be installed and available to your
@@ -87,4 +89,3 @@ Author: David Hayes [d.hayes@accenture.com]
 ## TBD
 - confine_to_keys
 - access keys usage
-
