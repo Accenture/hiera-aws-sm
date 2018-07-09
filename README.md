@@ -87,5 +87,3 @@ Author: David Hayes [d.hayes@accenture.com]
 ## Release Notes
 
 ## TBD
-- confine_to_keys
-- access keys usage

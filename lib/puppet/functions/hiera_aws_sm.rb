@@ -75,7 +75,10 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
   # into a Hash, it is returned, otherwise a String is returned.
   def get_secret(key, options, context)
 
-    secretsmanager = Aws::SecretsManager::Client.new
+    secretsmanager = Aws::SecretsManager::Client.new(
+      access_key_id: options["aws_access_key"],
+      secret_access_key: options["aws_secret_key"]
+    )
     secret_key = secret_key_name(key, options)
 
     response = nil

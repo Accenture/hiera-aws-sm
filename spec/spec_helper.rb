@@ -49,4 +49,7 @@ RSpec.configure do |c|
   end
   c.expect_with :rspec
   c.mock_with :rspec
+  c.after(:suite) do
+    RSpec::Puppet::Coverage.report!
+  end
 end
