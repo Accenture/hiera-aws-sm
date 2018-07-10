@@ -51,11 +51,11 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
 
     # Handle prefixes if suplied
     if prefixes = options["prefixes"]
-      raise ArgumentError, "[hiera-aws-sm] prefixes must be an array" unless prefixes.is_a?(Array)
-      if delimiter = options["delimiter"]
-        raise ArgumentError, "[hiera-aws-sm] delimiter must be a String" unless delimiter.is_a?(String)
+      raise ArgumentError, '[hiera-aws-sm] prefixes must be an array' unless prefixes.is_a?(Array)
+      if delimiter = options['delimiter']
+        raise ArgumentError, '[hiera-aws-sm] delimiter must be a String' unless delimiter.is_a?(String)
       else
-        delimiter = "/"
+        delimiter = '/'
       end
 
       # Remove trailing delimters from prefixes
@@ -69,12 +69,12 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     # Query SecretsManager for the secret data, stopping once we find a match
     result = nil
     puts keys
-    for secret_key in keys do
+    keys.each { |secret_key|
       result = get_secret(secret_key, options, context)
       if ! result.nil?
         break
       end
-    end
+    }
 
     continue_if_not_found = options["continue_if_not_found"] || false
 
@@ -98,10 +98,9 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
   # it is returned directly. If secret_string is set, and can be co-erced
   # into a Hash, it is returned, otherwise a String is returned.
   def get_secret(key, options, context)
-
     secretsmanager = Aws::SecretsManager::Client.new(
-      access_key_id: options["aws_access_key"],
-      secret_access_key: options["aws_secret_key"]
+      access_key_id: options['aws_access_key'],
+      secret_access_key: options['aws_secret_key'],
     )
 
     response = nil
@@ -118,8 +117,8 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key}"
     end
 
-    if ! response.nil?
-      if ! response.secret_binary.nil?
+    if !response.nil?
+      if !response.secret_binary.nil?
         context.explain("[hiera-aws-sm] #{key} is a binary")
         secret = response.secret_binary
       else
@@ -128,7 +127,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       end
     end
 
-    return secret
+    secret
   end
 
   ##
@@ -144,16 +143,15 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
 
   ##
   # Process the response secret string by attempting to coerce it
-  def process_secret_string(secret_string, options, context)
+  def process_secret_string(secret_string, _options, context)
     # Attempt to process this string as a JSON object
     begin
       result = JSON.parse(secret_string)
     rescue JSON::ParserError
-      context.explain("[hiera-aws-sm] Not a hashable result")
+      context.explain('[hiera-aws-sm] Not a hashable result')
       result = secret_string
     end
 
-    return result
+    result
   end
-
 end
