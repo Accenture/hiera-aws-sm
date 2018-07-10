@@ -49,8 +49,32 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       end
     end
 
-    # Query SecretsManager for the secret data
-    result = get_secret(key, options, context)
+    # Handle prefixes if suplied
+    if prefixes = options["prefixes"]
+      raise ArgumentError, "[hiera-aws-sm] prefixes must be an array" unless prefixes.is_a?(Array)
+      if delimiter = options["delimiter"]
+        raise ArgumentError, "[hiera-aws-sm] delimiter must be a String" unless delimiter.is_a?(String)
+      else
+        delimiter = "/"
+      end
+
+      # Remove trailing delimters from prefixes
+      prefixes = prefixes.map { |prefix| prefix[prefix.length-1] == delimiter ? prefix[0..prefix.length-2] : prefix }
+      # Merge keys and prefixes
+      keys = prefixes.map { |prefix| [prefix, key].join(delimiter)}
+    else
+      keys = [key]
+    end
+
+    # Query SecretsManager for the secret data, stopping once we find a match
+    result = nil
+    puts keys
+    for secret_key in keys do
+      result = get_secret(secret_key, options, context)
+      if ! result.nil?
+        break
+      end
+    end
 
     continue_if_not_found = options["continue_if_not_found"] || false
 
@@ -79,25 +103,24 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       access_key_id: options["aws_access_key"],
       secret_access_key: options["aws_secret_key"]
     )
-    secret_key = secret_key_name(key, options)
 
     response = nil
     secret = nil
 
-    context.explain("[hiera-aws-sm] Looking up #{secret_key}")
+    context.explain("[hiera-aws-sm] Looking up #{key}")
     begin
-      response = secretsmanager.get_secret_value(secret_id: secret_key)
+      response = secretsmanager.get_secret_value(secret_id: key)
     rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-      context.explain("[hiera-aws-sm] No data found for #{secret_key}")
+      context.explain("[hiera-aws-sm] No data found for #{key}")
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
-      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{secret_key}"
+      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
     rescue Aws::SecretsManager::Errors::ServiceError
-      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{secret_key}"
+      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key}"
     end
 
     if ! response.nil?
       if ! response.secret_binary.nil?
-        context.explain("[hiera-aws-sm] #{secret_key} is a binary")
+        context.explain("[hiera-aws-sm] #{key} is a binary")
         secret = response.secret_binary
       else
         # Do our processing in here

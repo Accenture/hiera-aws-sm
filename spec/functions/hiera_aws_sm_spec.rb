@@ -69,6 +69,74 @@ describe FakeFunction do
       end
     end
 
+    context "when prefixes are set" do
+      describe "and not an array" do
+        let :options do
+          { "prefixes" => "some-prefix" }
+        end
+        it "should raise ArgumentError" do
+          expect{function.lookup_key('test_key', options, context)}
+            .to raise_error(ArgumentError, "[hiera-aws-sm] prefixes must be an array")
+        end
+      end
+
+      describe "with prefix values" do
+        let :options do
+          { "prefixes" => [
+            "puppet/mynode",
+            "puppet/common",
+            "dev-environment/mynode",
+            "dev-environment/common"
+          ]}
+        end
+        describe "and matching secret" do
+          before do
+            Aws.config[:secretsmanager] = {
+              stub_responses: {
+                get_secret_value: {
+                  name: 'puppet/common/password',
+                  secret_string: 'password1'
+                }
+              }
+            }
+          end
+          it "should return the expected result for matching keys" do
+            expect(function.lookup_key('password', options, context)).to eq('password1')
+            expect(function.lookup_key('password', options, context)).to be_a(String)
+          end
+          describe "and invalid delimiter passed" do
+            let :options do
+              super().merge({ "delimiter" => ["foo", "bar"] })
+            end
+            it "should raise ArgumentError" do
+          expect{function.lookup_key('test_key', options, context)}
+            .to raise_error(ArgumentError, "[hiera-aws-sm] delimiter must be a String")
+            end
+          end
+        end
+        describe "and no matching secret" do
+          before do
+            Aws.config[:secretsmanager] = {
+              stub_responses: {
+                get_secret_value: 'ResourceNotFoundException'
+              }
+            }
+          end
+          it "should return nil" do
+            expect(function.lookup_key('test_key', options, context)).to be_nil
+          end
+          describe "with continue_if_not_found set" do
+            let :options do
+              super().merge({ "continue_if_not_found" => true })
+            end
+            it "should throw no_such_key" do
+              expect{function.lookup_key('test_key', options, context)}.to throw_symbol(:no_such_key)
+            end
+          end
+        end
+      end
+    end
+
     # Test behaviour
     context 'accessing non-existant key' do
       before do

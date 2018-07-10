@@ -42,7 +42,12 @@ hierarchy:
       continue_if_not_found: false
       aws_access_key: AKIAIXOdummyWS76XWFAQ
       aws_secret_key: 5z6hK+x/stestmX/kfBZzlTBKdemowM9HdazfBBl
-      prefix: "puppet"
+      delimiter: /
+      prefixes: 
+        - "%{::environment}/%{::trusted.certname}"
+        - "%{::environment}/common/"
+        - secret/puppet/%{::trusted.certname}/
+        - secret/puppet/common/
       confine_to_keys:
         - '^aws_.*'
 
@@ -66,9 +71,13 @@ roles.
 
 `aws_secret_key`: IAM secret access key to be used to connect to AWS. 
 
-`prefix`: Optional prefix to prepend to each lookup. For example, a prefix
-of 'puppet' will cause lookup('password') will do a query for the secret
-`puppet/password` against SecretsManager.
+`delimiter`: Character used to join prefixes and keys if specified.
+Defaults to `/`. Not required if `prefixes` is not set.
+
+`prefixes`: Optional array of prefixes to prepend to each lookup. For each
+prefix, the function will perform a lookup of `[prefix, key].join(delimiter)` against
+SecretsManager. This allows you to specify multiple paths in
+SecretsManager for the function to explore, as described above.
 
 `confine_to_keys`: List of regex expressions on which to search
 SecretsManager. If specified, hiera_aws_sm will only query SecretsManager
