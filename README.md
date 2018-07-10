@@ -42,6 +42,7 @@ hierarchy:
       continue_if_not_found: false
       aws_access_key: AKIAIXOdummyWS76XWFAQ
       aws_secret_key: 5z6hK+x/stestmX/kfBZzlTBKdemowM9HdazfBBl
+      region: us-east-1
       delimiter: /
       prefixes: 
         - "%{::environment}/%{::trusted.certname}"
@@ -70,6 +71,8 @@ within AWS should have their access to SecretsManager granted via IAM
 roles.
 
 `aws_secret_key`: IAM secret access key to be used to connect to AWS. 
+
+`region`: AWS region to query against
 
 `delimiter`: Character used to join prefixes and keys if specified.
 Defaults to `/`. Not required if `prefixes` is not set.

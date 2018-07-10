@@ -101,6 +101,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     secretsmanager = Aws::SecretsManager::Client.new(
       access_key_id: options['aws_access_key'],
       secret_access_key: options['aws_secret_key'],
+      region: options['region'],
     )
 
     response = nil
