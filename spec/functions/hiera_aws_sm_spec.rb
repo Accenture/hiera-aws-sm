@@ -15,6 +15,7 @@ describe FakeFunction do
     ctx = instance_double('Puppet::LookupContext')
     allow(ctx).to receive(:cache_has_key).and_return(false)
     allow(ctx).to receive(:explain)
+    #allow(ctx).to receive(:explain) { |&block| puts(block.call()) }
     allow(ctx).to receive(:not_found).and_throw(:no_such_key)
     allow(ctx).to receive(:cache).with(String, anything) do |_, val|
       val

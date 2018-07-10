@@ -44,7 +44,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       end
       re_match = Regexp.union(confine_keys)
       unless key[re_match] == key
-        context.explain("[hiera-aws-sm] Skipping secrets manager as #{key} doesn't match confine_to_keys")
+        context.explain{"[hiera-aws-sm] Skipping secrets manager as #{key} doesn't match confine_to_keys"}
         context.not_found
       end
     end
@@ -106,11 +106,11 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     response = nil
     secret = nil
 
-    context.explain("[hiera-aws-sm] Looking up #{key}")
+    context.explain{"[hiera-aws-sm] Looking up #{key}"}
     begin
       response = secretsmanager.get_secret_value(secret_id: key)
     rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-      context.explain("[hiera-aws-sm] No data found for #{key}")
+      context.explain{"[hiera-aws-sm] No data found for #{key}"}
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
     rescue Aws::SecretsManager::Errors::ServiceError
@@ -119,7 +119,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
 
     if !response.nil?
       if !response.secret_binary.nil?
-        context.explain("[hiera-aws-sm] #{key} is a binary")
+        context.explain{"[hiera-aws-sm] #{key} is a binary"}
         secret = response.secret_binary
       else
         # Do our processing in here
@@ -148,7 +148,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     begin
       result = JSON.parse(secret_string)
     rescue JSON::ParserError
-      context.explain('[hiera-aws-sm] Not a hashable result')
+      context.explain{'[hiera-aws-sm] Not a hashable result'}
       result = secret_string
     end
 

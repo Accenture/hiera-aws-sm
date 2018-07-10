@@ -15,6 +15,18 @@ default_facts = {
   facterversion: Facter.version,
 }
 
+class FakeFunction
+   def self.dispatch(name, &block) end
+end
+
+module Puppet
+  module Functions
+    def self.create_function(name, &block)
+      FakeFunction.class_eval(&block)
+    end
+  end
+end
+
 default_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_facts.yml'))
 default_module_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_module_facts.yml'))
 
@@ -28,6 +40,8 @@ end
 
 RSpec.configure do |c|
   c.default_facts = default_facts
+  c.expect_with :rspec
+  c.mock_with :rspec
   c.before :each do
     # set to strictest setting for testing
     # by default Puppet runs at warning level

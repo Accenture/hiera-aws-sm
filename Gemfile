@@ -47,8 +47,6 @@ gems['aws-sdk'] = ['~> 3']
 gems['aws-sdk-secretsmanager']
 gems['retries']
 gems['json']
-
-
 gems['puppet'] = location_for(puppet_version)
 gems['puppet-strings']
 
