@@ -1,5 +1,5 @@
 {
-  "name": "rdkcmf-hiera_aws_sm",
+  "name": "hiera_aws_sm",
   "version": "0.1.0",
   "author": "David Hayes [d.hayes@accenture.com]",
   "summary": "",
