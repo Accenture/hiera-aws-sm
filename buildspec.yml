@@ -7,8 +7,8 @@ phases:
       - dpkg -i puppet5-release-xenial.deb
       - apt update
       - apt-get install pdk
-      - export LC_ALL=en_US.UTF-8
   build:
     commands:
+      - export LC_ALL=en_US.UTF-8
       - /usr/local/bin/pdk test unit
       - /usr/local/bin/pdk validate
