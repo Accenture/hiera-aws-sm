@@ -9,5 +9,5 @@ phases:
       - apt-get install pdk
   build:
     commands:
-      - /opt/puppetlabs/bin/pdk test
-      - /opt/puppetlabs/bin/pdk validate
+      - /usr/local/bin/pdk test
+      - /usr/local/bin/pdk validate
