@@ -1,9 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    LC_ALL: en_US.UTF-8
-
 phases:
   install:
     commands:
@@ -11,6 +7,11 @@ phases:
       - dpkg -i puppet5-release-xenial.deb
       - apt update
       - apt-get install pdk
+  pre_build:
+    commands:
+      - export LC_ALL="en_US.UTF-8"
+      - locale-gen en_US en_US.UTF-8
+      - dpkg-reconfigure locales
   build:
     commands:
       - /usr/local/bin/pdk test unit
