@@ -9,6 +9,7 @@ phases:
       - apt-get install pdk
   pre_build:
     commands:
+      - bundle install
       - export LC_ALL="en_US.UTF-8"
       - locale-gen en_US en_US.UTF-8
       - dpkg-reconfigure locales
