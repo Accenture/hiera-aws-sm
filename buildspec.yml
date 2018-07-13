@@ -9,5 +9,4 @@ phases:
       - apt-get install pdk
   build:
     commands:
-      - export LC_ALL=en_US.UTF-8
-      - /usr/local/bin/pdk test unit
+      - LC_ALL=en_US.UTF-8; /usr/local/bin/pdk test unit
