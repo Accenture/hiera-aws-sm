@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  variables:
+    LC_ALL: en_US.UTF-8
+
 phases:
   install:
     commands:
@@ -9,4 +13,4 @@ phases:
       - apt-get install pdk
   build:
     commands:
-      - LC_ALL=en_US.UTF-8; /usr/local/bin/pdk test unit
+      - /usr/local/bin/pdk test unit
