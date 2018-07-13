@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'puppet/functions/hiera_aws_sm'
 
 describe FakeFunction do
-
   let :function do
     described_class.new
   end
@@ -26,112 +25,114 @@ describe FakeFunction do
     ctx
   end
 
-
-  describe "lookup_key" do
-
-    it 'should run' do
+  describe 'lookup_key' do
+    it 'will run' do
       expect(function.lookup_key('test_key', options, context)).to be_nil
     end
 
     # Test parameters / options
     context 'when confine_to_keys is set' do
-      describe "and not an array" do
+      describe 'and not an array' do
         let :options do
-          { "confine_to_keys" => 'foobar'}
+          { 'confine_to_keys' => 'foobar' }
         end
-        it "should raise ArgumentError" do
-          expect{function.lookup_key('test_key', options, context)}
-            .to raise_error(ArgumentError, "[hiera-aws-sm] confine_to_keys must be an array")
+
+        it 'will raise ArgumentError' do
+          expect { function.lookup_key('test_key', options, context) }
+            .to raise_error(ArgumentError, '[hiera-aws-sm] confine_to_keys must be an array')
         end
       end
-      describe "with regex values" do
-        before do
+      describe 'with regex values' do
+        before :each do
           Aws.config[:secretsmanager] = {
             stub_responses: {
               get_secret_value: {
                 name: 'puppet_password',
-                secret_string: 'password1'
-              }
-            }
+                secret_string: 'password1',
+              },
+            },
           }
         end
         let :options do
-          { "confine_to_keys" => [
-            '^puppet_.*'
-          ]}
+          { 'confine_to_keys' => ['^puppet_.*'] }
         end
-        it "should return context.not_found for non-matching keys" do
-          expect{function.lookup_key('test_key', options, context)}.to throw_symbol(:no_such_key)
+
+        it 'return context.not_found for non-matching keys' do
+          expect { function.lookup_key('test_key', options, context) }.to throw_symbol(:no_such_key)
         end
-        it "should return the expected result for matching keys" do
+        it 'return the expected result for matching keys' do
           expect(function.lookup_key('puppet_password', options, context)).to eq('password1')
           expect(function.lookup_key('puppet_password', options, context)).to be_a(String)
         end
       end
     end
 
-    context "when prefixes are set" do
-      describe "and not an array" do
+    context 'when prefixes are set' do
+      describe 'and not an array' do
         let :options do
-          { "prefixes" => "some-prefix" }
+          { 'prefixes' => 'some-prefix' }
         end
-        it "should raise ArgumentError" do
-          expect{function.lookup_key('test_key', options, context)}
-            .to raise_error(ArgumentError, "[hiera-aws-sm] prefixes must be an array")
+
+        it 'raise ArgumentError' do
+          expect { function.lookup_key('test_key', options, context) }
+            .to raise_error(ArgumentError, '[hiera-aws-sm] prefixes must be an array')
         end
       end
 
-      describe "with prefix values" do
+      describe 'with prefix values' do
         let :options do
-          { "prefixes" => [
-            "puppet/mynode",
-            "puppet/common",
-            "dev-environment/mynode",
-            "dev-environment/common"
-          ]}
+          { 'prefixes' => [
+            'puppet/mynode',
+            'puppet/common',
+            'dev-environment/mynode',
+            'dev-environment/common',
+          ] }
         end
-        describe "and matching secret" do
-          before do
+
+        describe 'and matching secret' do
+          before :each do
             Aws.config[:secretsmanager] = {
               stub_responses: {
                 get_secret_value: {
                   name: 'puppet/common/password',
-                  secret_string: 'password1'
-                }
-              }
+                  secret_string: 'password1',
+                },
+              },
             }
           end
-          it "should return the expected result for matching keys" do
+          it 'return the expected result for matching keys' do
             expect(function.lookup_key('password', options, context)).to eq('password1')
             expect(function.lookup_key('password', options, context)).to be_a(String)
           end
-          describe "and invalid delimiter passed" do
+          describe 'and invalid delimiter passed' do
             let :options do
-              super().merge({ "delimiter" => ["foo", "bar"] })
+              super().merge('delimiter' => %w[foo bar])
             end
-            it "should raise ArgumentError" do
-          expect{function.lookup_key('test_key', options, context)}
-            .to raise_error(ArgumentError, "[hiera-aws-sm] delimiter must be a String")
+
+            it 'raise ArgumentError' do
+              expect { function.lookup_key('test_key', options, context) }
+                .to raise_error(ArgumentError, '[hiera-aws-sm] delimiter must be a String')
             end
           end
         end
-        describe "and no matching secret" do
-          before do
+        describe 'and no matching secret' do
+          before :each do
             Aws.config[:secretsmanager] = {
               stub_responses: {
-                get_secret_value: 'ResourceNotFoundException'
-              }
+                get_secret_value: 'ResourceNotFoundException',
+              },
             }
           end
-          it "should return nil" do
+          it 'return nil' do
             expect(function.lookup_key('test_key', options, context)).to be_nil
           end
-          describe "with continue_if_not_found set" do
+          describe 'with continue_if_not_found set' do
             let :options do
-              super().merge({ "continue_if_not_found" => true })
+              super().merge('continue_if_not_found' => true)
             end
-            it "should throw no_such_key" do
-              expect{function.lookup_key('test_key', options, context)}.to throw_symbol(:no_such_key)
+
+            it 'throw no_such_key' do
+              expect { function.lookup_key('test_key', options, context) }.to throw_symbol(:no_such_key)
             end
           end
         end
@@ -140,98 +141,99 @@ describe FakeFunction do
 
     # Test behaviour
     context 'accessing non-existant key' do
-      before do
+      before :each do
         Aws.config[:secretsmanager] = {
           stub_responses: {
-            get_secret_value: 'ResourceNotFoundException'
-          }
+            get_secret_value: 'ResourceNotFoundException',
+          },
         }
       end
-      describe "with continue_if_not_found" do
+      describe 'with continue_if_not_found' do
         let :options do
-          { "continue_if_not_found" => true }
+          { 'continue_if_not_found' => true }
         end
-        it 'should throw no_such_key' do
-          expect{function.lookup_key('test_key', options, context)}.to throw_symbol(:no_such_key)
+
+        it 'throw no_such_key' do
+          expect { function.lookup_key('test_key', options, context) }.to throw_symbol(:no_such_key)
         end
       end
-      describe "without continue_if_not_found" do
-        it 'should return nil' do
+      describe 'without continue_if_not_found' do
+        it 'return nil' do
           expect(function.lookup_key('test_key', options, context)).to be_nil
         end
       end
     end
 
-    context "when missing permissions" do
-      before do
+    context 'when missing permissions' do
+      before :each do
         Aws.config[:secretsmanager] = {
           stub_responses: {
-            get_secret_value: 'UnrecognizedClientException'
-          }
+            get_secret_value: 'UnrecognizedClientException',
+          },
         }
       end
-      it 'should crash' do
-        expect{function.lookup_key('test_key', options, context)}
-          .to raise_error(Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access test_key")
+      it 'will crash' do
+        expect { function.lookup_key('test_key', options, context) }
+          .to raise_error(Puppet::DataBinding::LookupError, '[hiera-aws-sm] Skipping backend. No permission to access test_key')
       end
     end
 
-    context "on failing to call SecretsManager" do
-      before do
+    context 'on failing to call SecretsManager' do
+      before :each do
         Aws.config[:secretsmanager] = {
           stub_responses: {
-            get_secret_value: 'ServiceError'
-          }
+            get_secret_value: 'ServiceError',
+          },
         }
       end
-      it 'should crash when failing to call SecretsManager' do
-        expect{function.lookup_key('test_key', options, context)}
-          .to raise_error(Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup test_key")
+      it 'will crash when failing to call SecretsManager' do
+        expect { function.lookup_key('test_key', options, context) }
+          .to raise_error(Puppet::DataBinding::LookupError, '[hiera-aws-sm] Skipping backend. Failed to lookup test_key')
       end
     end
 
-    context "when querying a simple secret" do
-      before do
+    context 'when querying a simple secret' do
+      before :each do
         Aws.config[:secretsmanager] = {
           stub_responses: {
             get_secret_value: {
               name: 'test_key',
-              secret_string: 'password1'
-            }
-          }
+              secret_string: 'password1',
+            },
+          },
         }
       end
-      it 'should return a String' do
+      it 'will return a String' do
         expect(function.lookup_key('test_key', options, context))
           .to be_a(String)
       end
-      it 'should be the correct value' do
+      it 'will be the correct value' do
         expect(function.lookup_key('test_key', options, context))
           .to eq('password1')
       end
     end
 
-    context "when querying a json encoded secret" do
-      before do
+    context 'when querying a json encoded secret' do
+      before :each do
         Aws.config[:secretsmanager] = {
           stub_responses: {
             get_secret_value: {
               name: 'test_key',
-              secret_string: "{\"key1\": \"value1\", \"key2\": \"value2\"}"
-            }
-          }
+              secret_string: '{"key1": "value1", "key2": "value2"}',
+            },
+          },
         }
       end
-      it 'should return a Hash' do
+      it 'will return a Hash' do
         expect(function.lookup_key('test_key', options, context))
           .to be_a(Hash)
       end
-      it 'should be the correct value' do
+      it 'will be the correct value' do
         expect(function.lookup_key('test_key', options, context))
-          .to eq({
-            "key1" => "value1",
-            "key2" => "value2"
-          })
+          .to eq(
+            'key1' => 'value1',
+            'key2' => 'value2',
+          )
       end
     end
   end

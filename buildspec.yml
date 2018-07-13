@@ -11,4 +11,3 @@ phases:
     commands:
       - export LC_ALL=en_US.UTF-8
       - /usr/local/bin/pdk test unit
-      - /usr/local/bin/pdk validate

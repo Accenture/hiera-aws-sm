@@ -105,3 +105,11 @@ Style/IfUnlessModifier:
   Enabled: false
 Style/SymbolProc:
   Enabled: false
+Layout/LeadingCommentSpace:
+  Enabled: false
+Style/AndOr:
+  Enabled: false
+Layout/SpaceAroundOperators:
+  Enabled: false
+RSpec/FilePath:
+  Enabled: false

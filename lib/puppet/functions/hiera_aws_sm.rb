@@ -1,28 +1,25 @@
 Puppet::Functions.create_function(:hiera_aws_sm) do
-
   begin
     require 'json'
-  rescue LoadError => e
-    raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Must install json gem to use hiera-aws-sm backend"
+  rescue LoadError
+    raise Puppet::DataBinding::LookupError, '[hiera-aws-sm] Must install json gem to use hiera-aws-sm backend'
   end
   begin
     require 'aws-sdk-core'
-  rescue LoadError => e
-    raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Must install aws-sdk-core gem to use hiera-aws-sm backend"
+  rescue LoadError
+    raise Puppet::DataBinding::LookupError, '[hiera-aws-sm] Must install aws-sdk-core gem to use hiera-aws-sm backend'
   end
   begin
     require 'aws-sdk-secretsmanager'
-  rescue LoadError => e
-    raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Must install aws-sdk-secretsmanager gem to use hiera-aws-sm backend"
+  rescue LoadError
+    raise Puppet::DataBinding::LookupError, '[hiera-aws-sm] Must install aws-sdk-secretsmanager gem to use hiera-aws-sm backend'
   end
-
 
   dispatch :lookup_key do
     param 'Variant[String, Numeric]', :key
     param 'Hash', :options
     param 'Puppet::LookupContext', :context
   end
-
 
   ##
   # lookup_key
@@ -34,23 +31,23 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
   # @param context Puppet::LookupContext
   def lookup_key(key, options, context)
     # Filter out keys that do not match a regex in `confine_to_keys`, if it's specified
-    if confine_keys = options["confine_to_keys"]
-      raise ArgumentError, "[hiera-aws-sm] confine_to_keys must be an array" unless confine_keys.is_a?(Array)
+    if confine_keys = options['confine_to_keys']
+      raise ArgumentError, '[hiera-aws-sm] confine_to_keys must be an array' unless confine_keys.is_a?(Array)
 
       begin
-        confine_keys = confine_keys.map{ |r| Regexp.new(r) }
+        confine_keys = confine_keys.map { |r| Regexp.new(r) }
       rescue StandardError => err
         raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Failed to create regexp with error #{err}"
       end
       re_match = Regexp.union(confine_keys)
       unless key[re_match] == key
-        context.explain{"[hiera-aws-sm] Skipping secrets manager as #{key} doesn't match confine_to_keys"}
+        context.explain { "[hiera-aws-sm] Skipping secrets manager as #{key} doesn't match confine_to_keys" }
         context.not_found
       end
     end
 
     # Handle prefixes if suplied
-    if prefixes = options["prefixes"]
+    if prefixes = options['prefixes']
       raise ArgumentError, '[hiera-aws-sm] prefixes must be an array' unless prefixes.is_a?(Array)
       if delimiter = options['delimiter']
         raise ArgumentError, '[hiera-aws-sm] delimiter must be a String' unless delimiter.is_a?(String)
@@ -59,9 +56,9 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       end
 
       # Remove trailing delimters from prefixes
-      prefixes = prefixes.map { |prefix| prefix[prefix.length-1] == delimiter ? prefix[0..prefix.length-2] : prefix }
+      prefixes = prefixes.map { |prefix| (prefix[prefix.length-1] == delimiter) ? prefix[0..prefix.length-2] : prefix }
       # Merge keys and prefixes
-      keys = prefixes.map { |prefix| [prefix, key].join(delimiter)}
+      keys = prefixes.map { |prefix| [prefix, key].join(delimiter) }
     else
       keys = [key]
     end
@@ -69,19 +66,19 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     # Query SecretsManager for the secret data, stopping once we find a match
     result = nil
     puts keys
-    keys.each { |secret_key|
+    keys.each do |secret_key|
       result = get_secret(secret_key, options, context)
-      if ! result.nil?
+      unless result.nil?
         break
       end
-    }
+    end
 
-    continue_if_not_found = options["continue_if_not_found"] || false
+    continue_if_not_found = options['continue_if_not_found'] || false
 
     if result.nil? and continue_if_not_found
       context.not_found
     end
-    return result
+    result
   end
 
   ##
@@ -108,25 +105,27 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     response = nil
     secret = nil
 
-    context.explain{"[hiera-aws-sm] Looking up #{key}"}
+    context.explain { "[hiera-aws-sm] Looking up #{key}" }
     begin
       response = secretsmanager.get_secret_value(secret_id: key)
     rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-      context.explain{"[hiera-aws-sm] No data found for #{key}"}
+      context.explain { "[hiera-aws-sm] No data found for #{key}" }
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
     rescue Aws::SecretsManager::Errors::ServiceError
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key}"
     end
 
-    if !response.nil?
+    unless response.nil?
+      # rubocop:disable Style/NegatedIf
       if !response.secret_binary.nil?
-        context.explain{"[hiera-aws-sm] #{key} is a binary"}
+        context.explain { "[hiera-aws-sm] #{key} is a binary" }
         secret = response.secret_binary
       else
         # Do our processing in here
         secret = process_secret_string(response.secret_string, options, context)
       end
+      # rubocop:enable Style/NegatedIf
     end
 
     secret
@@ -150,7 +149,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     begin
       result = JSON.parse(secret_string)
     rescue JSON::ParserError
-      context.explain{'[hiera-aws-sm] Not a hashable result'}
+      context.explain { '[hiera-aws-sm] Not a hashable result' }
       result = secret_string
     end
 
