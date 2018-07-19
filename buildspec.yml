@@ -15,5 +15,5 @@ phases:
       - dpkg-reconfigure locales
   build:
     commands:
-      - bundle exec rake test
+      - bundle exec rake spec 
       - /usr/local/bin/pdk test unit --debug --verbose
