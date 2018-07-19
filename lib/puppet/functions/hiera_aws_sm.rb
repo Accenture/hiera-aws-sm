@@ -65,7 +65,6 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
 
     # Query SecretsManager for the secret data, stopping once we find a match
     result = nil
-    puts keys
     keys.each do |secret_key|
       result = get_secret(secret_key, options, context)
       unless result.nil?
