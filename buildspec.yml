@@ -15,4 +15,4 @@ phases:
       - dpkg-reconfigure locales
   build:
     commands:
-      - /usr/local/bin/pdk test unit --debug
+      - /usr/local/bin/pdk test unit --debug --verbose
