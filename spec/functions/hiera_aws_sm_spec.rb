@@ -26,6 +26,13 @@ describe FakeFunction do
   end
 
   describe 'lookup_key' do
+    before :each do
+      Aws.config[:secretsmanager] = {
+        stub_responses: {
+          get_secret_value: 'ResourceNotFoundException',
+        },
+      }
+    end
     it 'will run' do
       expect(function.lookup_key('test_key', options, context)).to be_nil
     end
