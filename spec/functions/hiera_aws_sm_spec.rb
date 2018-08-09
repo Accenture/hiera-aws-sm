@@ -38,6 +38,32 @@ describe FakeFunction do
     end
 
     # Test parameters / options
+    context 'when AWS options are set' do
+      describe 'and region set' do
+        let :options do
+          { 'region' => 'us-east-1' }
+        end
+        it 'will run' do
+          expect(function.lookup_key('test_key', options, context)).to be_nil
+        end
+      end
+      describe 'and aws_access_key set' do
+        let :options do
+          { 'aws_access_key' => 'hunter2' }
+        end
+        it 'will run' do
+          expect(function.lookup_key('test_key', options, context)).to be_nil
+        end
+      end
+      describe 'and aws_secret_key set' do
+        let :options do
+          { 'aws_secret_key' => 'hunter2' }
+        end
+        it 'will run' do
+          expect(function.lookup_key('test_key', options, context)).to be_nil
+        end
+      end
+    end
     context 'when confine_to_keys is set' do
       describe 'and not an array' do
         let :options do

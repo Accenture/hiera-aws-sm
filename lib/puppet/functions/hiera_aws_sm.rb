@@ -99,7 +99,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     client_opts['secret_access_key'] = options['aws_secret_key'] if options.key?('aws_secret_key')
     client_opts['region'] = options['region'] if options.key?('region')
 
-    secretsmanager = Aws::SecretsManager::Client.new(**client_opts)
+    secretsmanager = Aws::SecretsManager::Client.new(client_opts)
 
     response = nil
     secret = nil
