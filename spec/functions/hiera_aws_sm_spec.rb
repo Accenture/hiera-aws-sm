@@ -195,7 +195,7 @@ describe FakeFunction do
       end
       it 'will crash when failing to call SecretsManager' do
         expect { function.lookup_key('test_key', options, context) }
-          .to raise_error(Puppet::DataBinding::LookupError, '[hiera-aws-sm] Skipping backend. Failed to lookup test_key')
+          .to raise_error(Puppet::DataBinding::LookupError, /\[hiera-aws-sm\] Skipping backend. Failed to lookup test_key due to .*/)
       end
     end
 
