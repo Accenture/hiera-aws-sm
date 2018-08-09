@@ -111,8 +111,8 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       context.explain { "[hiera-aws-sm] No data found for #{key}" }
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
-    rescue Aws::SecretsManager::Errors::ServiceError
-      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key}"
+    rescue Aws::SecretsManager::Errors::ServiceError => e
+      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key} due to to #{e.message}"
     end
 
     unless response.nil?
