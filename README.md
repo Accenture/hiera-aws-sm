@@ -100,3 +100,4 @@ Author: David Hayes [d.hayes@accenture.com]
 
 ## TBD
 - Wrap secret values in Puppet's [sensitive data types](https://puppet.com/docs/puppet/5.5/lang_data_sensitive.html)
+- Expand README on usage and installation
