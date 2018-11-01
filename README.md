@@ -92,6 +92,14 @@ allowed to lookup against other data sources.
 
 This module is only compatible with Hiera 5 (Puppet 4.9+)
 
+## Testing
+
+```
+rvm use 2.5.1
+bundle install
+bundle exec rake test
+```
+
 ## Development
 
 Author: David Hayes [d.hayes@accenture.com]
