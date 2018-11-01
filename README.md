@@ -40,8 +40,8 @@ hierarchy:
     lookup_key: hiera_aws_sm
     options:
       continue_if_not_found: false
-      aws_access_key: AKIAIXOdummyWS76XWFAQ
-      aws_secret_key: 5z6hK+x/stestmX/kfBZzlTBKdemowM9HdazfBBl
+      aws_access_key: <aws_access_key>
+      aws_secret_key: <aws_secret_key>
       region: us-east-1
       delimiter: /
       prefixes: 
