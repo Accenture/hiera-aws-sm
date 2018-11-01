@@ -43,6 +43,7 @@ describe FakeFunction do
         let :options do
           { 'region' => 'us-east-1' }
         end
+
         it 'will run' do
           expect(function.lookup_key('test_key', options, context)).to be_nil
         end
@@ -51,6 +52,7 @@ describe FakeFunction do
         let :options do
           { 'aws_access_key' => 'hunter2' }
         end
+
         it 'will run' do
           expect(function.lookup_key('test_key', options, context)).to be_nil
         end
@@ -59,6 +61,7 @@ describe FakeFunction do
         let :options do
           { 'aws_secret_key' => 'hunter2' }
         end
+
         it 'will run' do
           expect(function.lookup_key('test_key', options, context)).to be_nil
         end
@@ -221,7 +224,7 @@ describe FakeFunction do
       end
       it 'will crash when failing to call SecretsManager' do
         expect { function.lookup_key('test_key', options, context) }
-          .to raise_error(Puppet::DataBinding::LookupError, /\[hiera-aws-sm\] Skipping backend. Failed to lookup test_key due to .*/)
+          .to raise_error(Puppet::DataBinding::LookupError, %r{\[hiera-aws-sm\] Skipping backend. Failed to lookup test_key due to .*})
       end
     end
 

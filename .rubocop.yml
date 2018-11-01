@@ -113,3 +113,7 @@ Layout/SpaceAroundOperators:
   Enabled: false
 RSpec/FilePath:
   Enabled: false
+Lint/AssignmentInCondition:
+  Enabled: false
+Lint/UnusedMethodArgument:
+  Enabled: false
