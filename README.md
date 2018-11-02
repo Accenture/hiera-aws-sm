@@ -95,9 +95,7 @@ This module is only compatible with Hiera 5 (Puppet 4.9+)
 ## Testing
 
 ```
-rvm use 2.5.1
-bundle install
-bundle exec rake test
+pdk test unit
 ```
 
 ## Development
