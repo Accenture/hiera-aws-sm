@@ -1,9 +1,9 @@
 {
-  "name": "rdkcmf-hiera_aws_sm",
+  "name": "accenture-hiera_aws_sm",
   "version": "0.1.0",
   "author": "David Hayes [d.hayes@accenture.com]",
-  "summary": "",
-  "license": "proprietary",
+  "summary": "Lookup secret values from AWS SecretsManager",
+  "license": "Apache-2.0",
   "source": "",
   "dependencies": [
 

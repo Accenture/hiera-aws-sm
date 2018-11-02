@@ -104,6 +104,9 @@ bundle exec rake test
 
 Author: David Hayes [d.hayes@accenture.com]
 
+## LICENSE
+See [LICENSE](LICENSE.md)
+
 ## Release Notes
 
 ## TBD
