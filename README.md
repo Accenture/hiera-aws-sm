@@ -92,7 +92,7 @@ allowed to lookup against other data sources.
 
 This module is only compatible with Hiera 5 (Puppet 4.9+)
 
-## Testing
+## Testing
 
 ```
 pdk test unit
@@ -102,11 +102,14 @@ pdk test unit
 
 Author: David Hayes [d.hayes@accenture.com]
 
-## LICENSE
+## License
+
 See [LICENSE](LICENSE.md)
 
 ## Release Notes
 
-## TBD
-- Wrap secret values in Puppet's [sensitive data types](https://puppet.com/docs/puppet/5.5/lang_data_sensitive.html)
+## TBD
+
+- Wrap secret values in Puppet's [sensitive data types](https://puppet.com/docs/puppet/5.5/lang_data_sensitive.html) in examples.
 - Expand README on usage and installation
+
