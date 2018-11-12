@@ -108,6 +108,17 @@ See [LICENSE](LICENSE.md)
 
 ## Release Notes
 
+### Steps required to publish module
+
+```
+rake module:bump_commit:<patch|minor|full>
+rake module:tag
+git push --tags
+```
+
+Travis will detect tagged commits, will build them, and push as a new
+release to the PuppetForge.
+
 ## TBD
 
 - Wrap secret values in Puppet's [sensitive data types](https://puppet.com/docs/puppet/5.5/lang_data_sensitive.html) in examples.
