@@ -41,9 +41,9 @@ notifications:
   email: false
 deploy:
   provider: puppetforge
-  user: puppet
+  user: accenture
   password:
-    secure: ""
+    secure: "SrlNFiG+uFus9mA83P1v2Zf7Rxs5RH9tiL1bsTDYZwwePVgI5w0XgsTqr6qTK18CLX8MCT0r67HyO+Jotx9GrXKqXvxUxfbugGHrEvjAT2waIQqW1vz8daitQX9cc0JzJpfeP2b2Rhzw0PmKBcNAjItuEuKYTJevjjF8c6iV3MKTxKByJ39RLWlODRnnOJqNAtUca71aGILXV89pISoVUs8gZv+JWZqq6at3p1d+rN1qkKcPVFYNYvZaml+JiHDEg5v9z2WAVDbZ+ZIQqy6wdOiX7mxtWZdqM5LFpxnl1I/tcYx/fkQVWcTUBkJTFj0f7Zt0ySLnIic3Ao2q60IsceTRWnJofAe0dwXHrPcNGsY748c/wgAje49QqKLZl7j1XZlo2AX62njRQhTq7J5tgNZxvWn8LUaAJ47uyKG8P6+znLPzbh7hGWhXDPnj7xFWUdiOG9hRzX/UKjJKxxQhBkcBxy9j0SL71zyxVUpSc5Q7crb0mGHH/kyFH8AZ9mYLPfoDnIyhLgYYGPEeR/OklMg4fHHT1UsR9ShXnjeam5nYe47Nh2tKjYGxRgcjvG1vkWK9g2ICsNmKvue6u8ywIYItUnW3pNTV2s0NUieM+2bgOWSUPVjUmPofL6uSuP7ZdKZU7D8oLZmkY+i/POFpW7g+zDSNJuVn+q7ggRGnQJE="
   on:
     tags: true
     all_branches: true
