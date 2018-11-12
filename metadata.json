@@ -1,10 +1,10 @@
 {
   "name": "accenture-hiera_aws_sm",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "David Hayes [d.hayes@accenture.com]",
   "summary": "Lookup secret values from AWS SecretsManager",
   "license": "Apache-2.0",
-  "source": "",
+  "source": "https://github.com/Accenture/hiera-aws-sm",
   "dependencies": [
 
   ],
