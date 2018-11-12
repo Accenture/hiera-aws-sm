@@ -1,5 +1,9 @@
 
 # hiera_aws_sm
+[![Build Status](https://travis-ci.org/Accenture/hiera-aws-sm.svg?branch=master)](https://travis-ci.org/Accenture/hiera-aws-sm)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/accenture/hiera_aws_sm.svg)](https://forge.puppet.com/accenture/hiera_aws_sm)
+
+
 
 #### Table of Contents
 
