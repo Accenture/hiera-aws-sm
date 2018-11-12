@@ -27,7 +27,7 @@ matrix:
     -
       env: CHECK=metadata_lint
     -
-      env: CHECK=release_checks
+      env: CHECK=release_checks DEPLOY_TO_FORGE=yes
     -
       env: CHECK=spec
     -
