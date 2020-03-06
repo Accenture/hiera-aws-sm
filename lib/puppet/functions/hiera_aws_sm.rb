@@ -1,5 +1,10 @@
 Puppet::Functions.create_function(:hiera_aws_sm) do
   begin
+    require 'open-uri'
+  rescue LoadError
+    raise Puppet::DataBinding::LookupError, '[hiera-aws-sm] Open-uri must be present to use hiera-aws-sm backend'
+  end
+  begin
     require 'json'
   rescue LoadError
     raise Puppet::DataBinding::LookupError, '[hiera-aws-sm] Must install json gem to use hiera-aws-sm backend'
@@ -98,6 +103,15 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     client_opts[:access_key_id] = options['aws_access_key'] if options.key?('aws_access_key')
     client_opts[:secret_access_key] = options['aws_secret_key'] if options.key?('aws_secret_key')
     client_opts[:region] = options['region'] if options.key?('region')
+    # if not specified, try local region from metadata
+    begin
+      if !options.key?('region')
+        id_doc = 'http://169.254.169.254/latest/dynamic/instance-identity/document'
+	client_opts[:region] = JSON.parse(open(id_doc, :read_timeout =>3).read)['region']
+      end
+    rescue OpenURI::HTTPError
+      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. :region not found, and instance metadata unavailable"
+    end
 
     secretsmanager = Aws::SecretsManager::Client.new(client_opts)
 
