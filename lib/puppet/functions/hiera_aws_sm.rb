@@ -1,8 +1,8 @@
 Puppet::Functions.create_function(:hiera_aws_sm) do
   begin
-    require 'faraday'
+    require 'open-uri'
   rescue LoadError
-    raise Puppet::DataBinding::LookupError, '[hiera-aws-sm] Must install faraday gem to use hiera-aws-sm backend'
+    raise Puppet::DataBinding::LookupError, '[hiera-aws-sm] Open-uri must be present to use hiera-aws-sm backend'
   end
   begin
     require 'json'
@@ -107,10 +107,9 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     begin
       if !options.key?('region')
         id_doc = 'http://169.254.169.254/latest/dynamic/instance-identity/document'
-        conn = Faraday.new(id_doc, request: { timeout: 5 })
-        client_opts[:region] = JSON.parse(conn.get().body())['region']
+	client_opts[:region] = JSON.parse(open(id_doc, :read_timeout =>3).read)['region']
       end
-    rescue Faraday::Error::ConnectionFailed, Faraday::Error::TimeoutError
+    rescue OpenURI::HTTPError
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. :region not found, and instance metadata unavailable"
     end
 
