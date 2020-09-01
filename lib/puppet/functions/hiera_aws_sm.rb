@@ -106,7 +106,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
 
     context.explain { "[hiera-aws-sm] Looking up #{key}" }
     begin
-      response = secretsmanager.get_secret_value(secret_id: key)
+      response = secretsmanager.get_secret_value(secret_id: key.gsub! '::' '/')
     rescue Aws::SecretsManager::Errors::ResourceNotFoundException
       context.explain { "[hiera-aws-sm] No data found for #{key}" }
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
