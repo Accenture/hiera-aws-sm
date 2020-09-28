@@ -110,8 +110,6 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       response = secretsmanager.get_secret_value(secret_id: secret_formatted)
     rescue Aws::SecretsManager::Errors::ResourceNotFoundException
       context.explain { "[hiera-aws-sm] No data found for #{key}" }
-    rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-      context.explain { "[hiera-aws-sm] No data found for #{key}" }
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
     rescue Aws::SecretsManager::Errors::ServiceError => e
