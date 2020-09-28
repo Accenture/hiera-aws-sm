@@ -113,7 +113,11 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
     rescue Aws::SecretsManager::Errors::ServiceError => e
-      raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key} due to #{e.message}"
+      if e.message == 'You can\'t perform this operation on the secret because it was marked for deletion.' then
+        context.explain { "[hiera-aws-sm] #{key} found but scheduled for deletion" }
+      else
+        raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key} due to #{e.message}"
+      end
     end
 
     unless response.nil?
