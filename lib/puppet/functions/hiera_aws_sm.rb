@@ -1,3 +1,5 @@
+require logger
+
 Puppet::Functions.create_function(:hiera_aws_sm) do
   begin
     require 'json'
@@ -104,12 +106,14 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     response = nil
     secret = nil
 
+    log = Logger.new(STDOUT)
+    log.level = Logger::INFO
     context.explain { "[hiera-aws-sm] Looking up #{key}" }
     begin
       secret_formatted = key.gsub('::', '/')
       response = secretsmanager.get_secret_value(secret_id: secret_formatted)
     rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-      info("[hiera-aws-sm] No data found for #{key}")
+      log.info("[hiera-aws-sm] No data found for #{key}")
       context.explain { "[hiera-aws-sm] No data found for #{key}" }
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
