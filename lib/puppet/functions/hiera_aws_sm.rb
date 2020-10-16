@@ -100,14 +100,23 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     client_opts[:access_key_id] = options['aws_access_key'] if options.key?('aws_access_key')
     client_opts[:secret_access_key] = options['aws_secret_key'] if options.key?('aws_secret_key')
     client_opts[:region] = options['region'] if options.key?('region')
+    
+    log = Logger.new(STDOUT)
+    case options['log_level']
+    when 'info'
+      log.level = Logger::INFO
+    when 'warn'
+      log.level = Logger::WARN    
+    when 'debug'
+      log.level = Logger::DEBUG
+    else
+      log.level = Logger::ERROR
 
     secretsmanager = Aws::SecretsManager::Client.new(client_opts)
 
     response = nil
     secret = nil
 
-    log = Logger.new(STDOUT)
-    log.level = Logger::INFO
     context.explain { "[hiera-aws-sm] Looking up #{key}" }
     begin
       secret_formatted = key.gsub('::', '/')
