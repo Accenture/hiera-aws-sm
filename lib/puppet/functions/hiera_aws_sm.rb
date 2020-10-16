@@ -111,7 +111,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       log.level = Logger::DEBUG
     else
       log.level = Logger::ERROR
-
+    end
     secretsmanager = Aws::SecretsManager::Client.new(client_opts)
 
     response = nil
@@ -126,12 +126,15 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       context.explain { "[hiera-aws-sm] No data found for #{key}" }
       if key.include? "common"
         log.warn("[hiera-aws-sm] secret #{key} not found in SM")
+      else
+        log.info("[hiera-aws-sm] secret #{key} not found in SM")
       end
     rescue Aws::SecretsManager::Errors::UnrecognizedClientException
       raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. No permission to access #{key}"
     rescue Aws::SecretsManager::Errors::ServiceError => e
       if e.message == 'You can\'t perform this operation on the secret because it was marked for deletion.' then
         context.explain { "[hiera-aws-sm] #{key} found but scheduled for deletion" }
+        log.info("[hiera-aws-sm] #{key} found but scheduled for deletion")
       else
         raise Puppet::DataBinding::LookupError, "[hiera-aws-sm] Skipping backend. Failed to lookup #{key} due to #{e.message}"
       end
