@@ -46,6 +46,15 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       end
     end
 
+    # Optional patterns to strip from keys prior to lookup
+    if strip_from_keys = options['strip_from_keys']
+      raise ArgumentError, '[hiera-aws-sm] strip_from_keys must be an array' unless strip_from_keys.is_a?(Array)
+
+      strip_from_keys.each do |prefix|
+        key = key.gsub(Regexp.new(prefix), '')
+      end
+    end
+
     # Handle prefixes if suplied
     if prefixes = options['prefixes']
       raise ArgumentError, '[hiera-aws-sm] prefixes must be an array' unless prefixes.is_a?(Array)
