@@ -106,6 +106,8 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     # Allow Client Config Options Hash. Default to Empty Hash for Backwards Compatibility
     client_opts = options.key?('aws_client_options') ? options['aws_client_options'].transform_keys(&:to_sym) : {}
 
+    # Allow Credential Loading From External File (Allowing for Easier Credential Rotation Outside of Puppet as Needed)
+    # ref: https://github.com/aws/aws-sdk-ruby/blob/version-3/gems/aws-sdk-core/lib/aws-sdk-core/shared_credentials.rb
     if options.key?('shared_credentials')
       client_opts[:credentials] = Aws::SharedCredentials.new(options['shared_credentials'].transform_keys(&:to_sym))
     else
