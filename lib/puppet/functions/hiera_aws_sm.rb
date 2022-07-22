@@ -103,9 +103,16 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
   # it is returned directly. If secret_string is set, and can be co-erced
   # into a Hash, it is returned, otherwise a String is returned.
   def get_secret(key, options, context)
-    client_opts = {}
-    client_opts[:access_key_id] = options['aws_access_key'] if options.key?('aws_access_key')
-    client_opts[:secret_access_key] = options['aws_secret_key'] if options.key?('aws_secret_key')
+    # Allow Client Config Options Hash. Default to Empty Hash for Backwards Compatibility
+    client_opts = options.key?('aws_client_options') ? options['aws_client_options'].transform_keys(&:to_sym) : {}
+
+    if options.key?('shared_credentials')
+      client_opts[:credentials] = Aws::SharedCredentials.new(options['shared_credentials'].transform_keys(&:to_sym))
+    else
+      client_opts[:access_key_id] = options['aws_access_key'] if options.key?('aws_access_key')
+      client_opts[:secret_access_key] = options['aws_secret_key'] if options.key?('aws_secret_key')
+    end
+
     client_opts[:region] = options['region'] if options.key?('region')
 
     secretsmanager = Aws::SecretsManager::Client.new(client_opts)
