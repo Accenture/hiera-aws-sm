@@ -72,12 +72,21 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       keys = [key]
     end
 
-    # Query SecretsManager for the secret data, stopping once we find a match
     result = nil
-    keys.each do |secret_key|
-      result = get_secret(secret_key, options, context)
-      unless result.nil?
-        break
+
+    # Return cached key / value if present
+    if context.cache_has_key(key)
+      context.explain { "[hiera-aws-sm] Returning #{key} from cache" }
+      result = context.cached_value(key)
+    end
+
+    # Query SecretsManager for the secret data, stopping once we find a match
+    if result.nil?
+      keys.each do |secret_key|
+        result = get_secret(secret_key, options, context)
+        unless result.nil?    
+          break
+        end
       end
     end
 
@@ -86,6 +95,11 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     if result.nil? and continue_if_not_found
       context.not_found
     end
+
+    # Cache key / value
+    context.explain { "[hiera-aws-sm] Caching #{key}" }
+    context.cache(key, result)
+
     result
   end
 
