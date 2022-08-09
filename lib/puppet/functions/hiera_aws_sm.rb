@@ -55,7 +55,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       end
     end
 
-    # Handle prefixes if suplied
+    # Handle prefixes if supplied
     if prefixes = options['prefixes']
       raise ArgumentError, '[hiera-aws-sm] prefixes must be an array' unless prefixes.is_a?(Array)
       if delimiter = options['delimiter']
