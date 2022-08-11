@@ -79,8 +79,8 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       keys.each do |secret_key|
         result = get_secret(secret_key, options, context)
         unless result.nil?
-          context.explain { "[hiera-aws-sm] Caching key #{key}" }
-          context.cache(key, result)
+          context.explain { "[hiera-aws-sm] Caching key #{secret_key}" }
+          context.cache(secret_key, result)
           break
         end
       end
