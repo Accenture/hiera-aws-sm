@@ -46,7 +46,16 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       end
     end
 
-    # Handle prefixes if suplied
+    # Optional patterns to strip from keys prior to lookup
+    if strip_from_keys = options['strip_from_keys']
+      raise ArgumentError, '[hiera-aws-sm] strip_from_keys must be an array' unless strip_from_keys.is_a?(Array)
+
+      strip_from_keys.each do |prefix|
+        key = key.gsub(Regexp.new(prefix), '')
+      end
+    end
+
+    # Handle prefixes if supplied
     if prefixes = options['prefixes']
       raise ArgumentError, '[hiera-aws-sm] prefixes must be an array' unless prefixes.is_a?(Array)
       if delimiter = options['delimiter']
@@ -63,12 +72,17 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
       keys = [key]
     end
 
-    # Query SecretsManager for the secret data, stopping once we find a match
     result = nil
-    keys.each do |secret_key|
-      result = get_secret(secret_key, options, context)
-      unless result.nil?
-        break
+
+    # Query SecretsManager for the secret data, stopping once we find a match
+    if result.nil?
+      keys.each do |secret_key|
+        result = get_secret(secret_key, options, context)
+        unless result.nil?
+          context.explain { "[hiera-aws-sm] Caching key #{secret_key}" }
+          context.cache(secret_key, result)
+          break
+        end
       end
     end
 
@@ -77,6 +91,7 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
     if result.nil? and continue_if_not_found
       context.not_found
     end
+
     result
   end
 
@@ -94,9 +109,24 @@ Puppet::Functions.create_function(:hiera_aws_sm) do
   # it is returned directly. If secret_string is set, and can be co-erced
   # into a Hash, it is returned, otherwise a String is returned.
   def get_secret(key, options, context)
-    client_opts = {}
-    client_opts[:access_key_id] = options['aws_access_key'] if options.key?('aws_access_key')
-    client_opts[:secret_access_key] = options['aws_secret_key'] if options.key?('aws_secret_key')
+    # Return Cached Value if Present
+    if context.cache_has_key(key)
+      context.explain { "[hiera-aws-sm] Returning #{key} from cache..." }
+      return context.cached_value(key)
+    end
+
+    # Allow Client Config Options Hash. Default to Empty Hash for Backwards Compatibility
+    client_opts = options.key?('aws_client_options') ? options['aws_client_options'].transform_keys(&:to_sym) : {}
+
+    # Allow Credential Loading From External File (Allowing for Easier Credential Rotation Outside of Puppet as Needed)
+    # ref: https://github.com/aws/aws-sdk-ruby/blob/version-3/gems/aws-sdk-core/lib/aws-sdk-core/shared_credentials.rb
+    if options.key?('shared_credentials')
+      client_opts[:credentials] = Aws::SharedCredentials.new(options['shared_credentials'].transform_keys(&:to_sym))
+    else
+      client_opts[:access_key_id] = options['aws_access_key'] if options.key?('aws_access_key')
+      client_opts[:secret_access_key] = options['aws_secret_key'] if options.key?('aws_secret_key')
+    end
+
     client_opts[:region] = options['region'] if options.key?('region')
 
     secretsmanager = Aws::SecretsManager::Client.new(client_opts)
